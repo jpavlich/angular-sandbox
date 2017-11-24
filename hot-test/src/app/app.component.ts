@@ -6,9 +6,26 @@ import * as Handsontable from 'handsontable';
 
 const CustomEditor1 = Handsontable.editors.AutocompleteEditor.prototype.extend();
 
-// CustomEditor1.prototype.createElements = function () {
-//   // Call the original createElements method
-//   Handsontable.editors.TextEditor.prototype.createElements.apply(this, arguments);
+
+CustomEditor1.prototype.queryChoices = function(query) {
+  this.query = query;
+  const source = this.cellProperties.source;
+
+  if (typeof source === 'function') {
+    source.call(this.cellProperties, query, (choices) => {
+      this.rawChoices = choices;
+      this.updateChoicesList(this.stripValuesIfNeeded(choices));
+    });
+
+  } else if (Array.isArray(source)) {
+    this.rawChoices = source;
+    this.updateChoicesList(this.stripValuesIfNeeded(source));
+
+  } else {
+    this.updateChoicesList([]);
+  }
+};
+
 CustomEditor1.prototype.stripValuesIfNeeded = function (values) {
   const {allowHtml} = this.cellProperties;
 
@@ -45,9 +62,9 @@ export class AppComponent {
       renderer: this.dropdownRenderer,
       editor: CustomEditor1,
       source: [
-        JSON.stringify({ id: 1, value: 'aaa' }),
-        JSON.stringify({ id: 2, value: 'bbb' }),
-        JSON.stringify({ id: 3, value: 'ccc' }),
+        { id: 1, value: 'aaa' },
+        { id: 2, value: 'bbb' },
+        { id: 3, value: 'ccc' },
       ]
     },
     {
