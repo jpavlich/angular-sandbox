@@ -4,7 +4,22 @@ import * as Handsontable from 'handsontable';
 
 
 
+const CustomEditor1 = Handsontable.editors.AutocompleteEditor.prototype.extend();
 
+// CustomEditor1.prototype.createElements = function () {
+//   // Call the original createElements method
+//   Handsontable.editors.TextEditor.prototype.createElements.apply(this, arguments);
+CustomEditor1.prototype.stripValuesIfNeeded = function (values) {
+  const {allowHtml} = this.cellProperties;
+
+  const stringifiedValues = values.map((value) => JSON.stringify(value));
+  // const strippedValues = arrayMap(stringifiedValues, (value) => (allowHtml ? value : stripTags(value)));
+  const strippedValues = stringifiedValues; // TODO Remover tags html
+  console.log('--->');//, strippedValues);
+  return strippedValues;
+};
+
+// };
 
 
 @Component({
@@ -25,37 +40,30 @@ export class AppComponent {
     [7, 8, 9]
   ];
 
-  // columns = [
-  //   {
-  //     renderer: 'dropdown2',
-  //     source: ['yellow', 'red', 'orange', 'green', 'blue', 'gray', 'black', 'white']
-  //   },
-  //   {
+  columns = [
+    {
+      renderer: this.dropdownRenderer,
+      editor: CustomEditor1,
+      source: [
+        JSON.stringify({ id: 1, value: 'aaa' }),
+        JSON.stringify({ id: 2, value: 'bbb' }),
+        JSON.stringify({ id: 3, value: 'ccc' }),
+      ]
+    },
+    {
 
-  //   },
-  //   {
-  //   }
-  // ];
-
-
-
-  options = {
-    cells: (row, col, prop) => {
-      const cellProperties = {};
-      if (row > 0 && col === 0) {
-        Object.assign(cellProperties, {renderer: this.customRenderer});
-        return cellProperties;
-      }
-      return prop;
+    },
+    {
     }
+  ];
 
-  };
-
-
-  customRenderer(hotInstance, td, row, column, prop, value, cellProperties) {
-    Handsontable.renderers.BaseRenderer.apply(this, arguments);
+  dropdownRenderer(hotInstance, td, row, column, prop, value, cellProperties) {
+    const data = JSON.parse(value);
+    Handsontable.renderers.AutocompleteRenderer.apply(this, [hotInstance, td, row, column, prop, data.value, cellProperties]);
     td.style.fontWeight = 'bold';
     td.style.textAlign = 'center';
+
+    return td;
   }
 
 }
