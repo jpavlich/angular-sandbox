@@ -11,7 +11,7 @@ export class PostService {
   constructor(private service: SequentialHttpClientService, private service2: HttpClient) { }
 
 
-  getSequential(ids: number[]): string[] {
+  getSequential(ids: number[]) {
     for (const id of ids) {
       this.service.get('https://jsonplaceholder.typicode.com/posts/' + id)
         .subscribe(
@@ -24,9 +24,8 @@ export class PostService {
   }
 
   getNonSequential(ids: number[]) {
-    let subs: Subscription;
     for (const id of ids) {
-      subs = this.service2.get('https://jsonplaceholder.typicode.com/posts/' + id)
+      this.service2.get('https://jsonplaceholder.typicode.com/posts/' + id)
         .subscribe(
           data => {
             console.log(data);
